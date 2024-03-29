@@ -86,7 +86,31 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'your-subscription'
+              azureSubscription: 'Azure subscription 1(fe0b69f6-332b-4a2a-97df-a27b4d20dfb7)'
+              appType: 'webAppLinux'
+              appName: '$(WebAppNameDev)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
+- stage: 'Staging'
+  displayName: 'Deploy to the staging environment'
+  dependsOn: Dev
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-20.04'
+    environment: staging
+    variables:
+    - group: 'Release'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            displayName: 'Azure App Service Deploy: website'
+            inputs:
+              azureSubscription: 'Azure subscription 1(fe0b69f6-332b-4a2a-97df-a27b4d20dfb7)'
               appType: 'webAppLinux'
               appName: '$(WebAppNameDev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
